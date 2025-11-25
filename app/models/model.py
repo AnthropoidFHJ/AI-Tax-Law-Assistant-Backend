@@ -24,14 +24,7 @@ class AuditLog(Base):
     details = Column(JSON)
     user_tin = Column(String, index=True)
     created_at = Column(DateTime, server_default=func.now())
-
-# Create tables if not exist (can be moved to migration system later)
-try:
     Base.metadata.create_all(bind=engine)
-except Exception as e:
-    print(f"DB init warning: {e}")
-
-# Dependency
 
 def get_db():
     db = SessionLocal()

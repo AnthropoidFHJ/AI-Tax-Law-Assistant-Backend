@@ -11,7 +11,6 @@ def _derive_key() -> bytes:
         raw = base64.urlsafe_b64decode(settings.ENCRYPTION_KEY.encode())
         if len(raw) == 32:
             return raw
-    # Fallback insecure dev key (DO NOT USE IN PROD)
     return os.urandom(32)
 
 
