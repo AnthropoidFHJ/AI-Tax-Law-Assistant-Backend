@@ -1,7 +1,3 @@
-"""
-Data ingestion script for Bangladesh tax law knowledge base.
-Run this to populate Pinecone with law documents.
-"""
 import os
 import asyncio
 from pathlib import Path
@@ -15,19 +11,16 @@ class LawIngester:
         self.service = AIService()
         
     async def ingest_law_folder(self, folder_path: str = "app/data"):
-        """Ingest all law documents from folder and subfolders"""
         folder = Path(folder_path)
         if not folder.exists():
             print(f"Folder {folder_path} not found")
             return
-            
-        # Process files in main data directory
+
         for file_path in folder.glob("*.txt"):
             await self.ingest_law_file(str(file_path))
         for file_path in folder.glob("*.pdf"):
             await self.ingest_law_file(str(file_path))
-            
-        # Process files in laws subdirectory
+
         laws_folder = folder / "laws"
         if laws_folder.exists():
             for file_path in laws_folder.glob("*.txt"):
@@ -36,10 +29,7 @@ class LawIngester:
                 await self.ingest_law_file(str(file_path))
             
     async def ingest_law_file(self, file_path: str):
-        """Ingest single law document (PDF or TXT)"""
         print(f"Ingesting: {file_path}")
-        
-        # Determine file type and extract text
         if file_path.lower().endswith('.pdf'):
             with open(file_path, 'rb') as f:
                 pdf_bytes = f.read()
@@ -50,7 +40,7 @@ class LawIngester:
                 
         text = clean_text(text)
         if not text.strip():
-            print(f"⚠️ No text extracted from {file_path}")
+            print(f"No text extracted from {file_path}")
             return
             
         chunks = chunk_text(text)
@@ -69,14 +59,12 @@ class LawIngester:
             self.service.index.upsert(vectors=vectors)
             print(f"✓ Upserted {len(vectors)} vectors for {filename}")
         else:
-            print("⚠️ Pinecone not initialized")
-
+            print("Pinecone not initialized")
 
 async def main():
     ingester = LawIngester()
     await ingester.ingest_law_folder()
     print("Knowledge base ingestion complete!")
-
 
 if __name__ == "__main__":
     asyncio.run(main())
